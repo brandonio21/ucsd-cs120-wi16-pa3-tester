@@ -5,7 +5,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#define CALLS 100
 #define BLOCK 0
 #define UNBLOCK 1
 
@@ -15,10 +14,11 @@ struct call {
   int calledFunction;
   int arg;
 } lastCall;
+
+/* Keep track of failures and tests run */
 int failures = 0;
 int testFailures = 0;
 int tests = 0;
-
 
 /* debug output */
 int debug = 0;
