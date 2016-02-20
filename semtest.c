@@ -232,6 +232,48 @@ void test_max_wait_list_fifo() {
     }
 }
 
+/*
+ * tests repeatedly having a bunch of processes wait and then
+ * be signaled on a single semaphore
+ */
+void test_repeated_all_wait_all_signal() {
+    int sem = MySeminit(1, 0);
+
+    for (int cycle = 0; cycle < 4; cycle++) {
+        for (int pid = 1; pid <= 5; pid++) {
+            MyWait(pid, sem);
+            assert_block_called_with(pid);
+        }
+
+        for (int pid = 1; pid <= 5; pid++) {
+            MySignal(6, sem);
+            assert_unblock_called_with(pid);
+        }
+    }
+}
+
+/*
+ * tests "inchworming" processes by having them all wait on a semaphore
+ * and then incrementally having each one be unblocked and then blocked again
+ */
+void test_fifo_no_starvation() {
+    int sem = MySeminit(1, 0);
+
+    for (int pid = 1; pid <= 5; pid++) {
+        MyWait(pid, sem);
+        assert_block_called_with(pid);
+    }
+
+    for (int cycle = 0; cycle < 5; cycle++) {
+        for (int pid = 1; pid <= 5; pid++) {
+            MySignal(6, sem);
+            assert_unblock_called_with(pid);
+            MyWait(pid, sem);
+            assert_block_called_with(pid);
+        }
+    }
+}
+
 /* TESTS ARE CALLED HERE ----------- */
 void main(int argc, char** argv) {
   if (argc > 1 && strcmp(argv[1], "-v") == 0)
@@ -243,6 +285,8 @@ void main(int argc, char** argv) {
   test(high_value_sem, "High value semaphore");
   test(test_fifo_impl, "FIFO Test");
   test(test_max_wait_list_fifo, "Maxing out process wait list");
+  test(test_repeated_all_wait_all_signal, "Repeated all wait / all signal");
+  test(test_fifo_no_starvation, "Cyclic wait signal one at a time");
 
   /* final output */
   printf("%d/%d TESTS PASSED\n", tests-testFailures, tests);
