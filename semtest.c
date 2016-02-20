@@ -211,6 +211,27 @@ void locked_sem_test() {
   assert_unblock_called_with(2);
 }
 
+/*
+ * tests whether your semaphore wait list can handle every process waiting on it
+ * technically if this happens there won't be any processes alive for there to be
+ * a deadlock
+ */
+void test_max_wait_list_fifo() {
+    int sem = MySeminit(1, 0);
+
+    // add every process to the wait list
+    for (int pid = 1; pid <= MAXPROCS; pid++) {
+        MyWait(pid, sem);
+        assert_block_called_with(pid);
+    }
+
+    for (int pid = 1; pid <= MAXPROCS; pid++) {
+        // technically 0 here is invalid as a pid, but it probably doesn't matter?
+        MySignal(0, sem);
+        assert_unblock_called_with(pid);
+    }
+}
+
 /* TESTS ARE CALLED HERE ----------- */
 void main(int argc, char** argv) {
   if (argc > 1 && strcmp(argv[1], "-v") == 0)
@@ -221,6 +242,7 @@ void main(int argc, char** argv) {
   test(locked_sem_test, "2 proc must wait");
   test(high_value_sem, "High value semaphore");
   test(test_fifo_impl, "FIFO Test");
+  test(test_max_wait_list_fifo, "Maxing out process wait list");
 
   /* final output */
   printf("%d/%d TESTS PASSED\n", tests-testFailures, tests);
