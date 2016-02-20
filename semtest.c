@@ -106,7 +106,7 @@ void assert_block_not_called_with() {
 }
 
 
-void assert_unblock_non_called_with() {
+void assert_unblock_not_called_with() {
   if (debug)
     printf("[DEBUG] Expecting last call to NOT BE Unblock\n");
 
@@ -162,7 +162,7 @@ void test_fifo_impl() {
   MySignal(0,s);
   assert_unblock_called_with(6);
   MySignal(0,s);
-  assert_unblock_non_called_with();
+  assert_unblock_not_called_with();
 }
 void high_value_sem() {
   int s = MySeminit(0,5);
